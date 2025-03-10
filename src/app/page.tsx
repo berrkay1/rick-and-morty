@@ -3,26 +3,30 @@ import { getCharacters } from '@/api/global';
 import { FilterBar } from '@/view/components/filterBar';
 import { CharacterGrid } from '@/view/components/characterGrid';
 import { Pagination } from '@/view/components/pagination';
-import { CharacterFilters } from '@/models/global';
+import {
+  CharacterFilters,
+  CharacterGender,
+  CharacterStatus,
+} from '@/models/global';
 
-type HomePageProps = {
-  searchParams: {
+interface HomePageProps {
+  searchParams: Promise<{
     status?: string;
     gender?: string;
     page?: string;
-  };
-};
+  }>;
+}
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const result = await searchParams;
-  const filters = {
-    status: result?.status,
-    gender: result?.gender,
-    page: parseInt(result?.page || '1', 10),
+
+  const filters: CharacterFilters = {
+    status: (result?.status as CharacterStatus) || undefined,
+    gender: (result?.gender as CharacterGender) || undefined,
+    page: result?.page ? parseInt(result.page, 10) : 1,
   };
-  const { results: characters, info } = await getCharacters(
-    filters as CharacterFilters,
-  );
+
+  const { results: characters, info } = await getCharacters(filters);
 
   return (
     <main className="container mx-auto py-8 px-4">
